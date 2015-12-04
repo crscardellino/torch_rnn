@@ -42,3 +42,10 @@ luac.out
 # IntelliJ IDEA
 *.iml
 /.idea/
+
+# iTorch
+.ipynb_checkpoints/
+
+# Project Specific
+/resources/
+/test.ipynb
