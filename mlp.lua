@@ -1,12 +1,7 @@
---[[
-	Copyright (c) 2016, Cristian Cardellino.
-	This work is licensed under the "New BSD License". 
-	See LICENSE for more information.
-]]--
-
 require 'torch'
 require 'nn'
 require 'mltools'
+require 'optim'
 
 -- Load and split the dataset
 print("Loading the dataset")
@@ -27,10 +22,10 @@ mlp:add(nn.Linear(2500, output_dim))
 mlp:add(nn.LogSoftMax())
 
 -- Define the Criterion
-local criterion = nn.ClasNLLCriterion()
+local loss = nn.ClassNLLCriterion()
 
 -- Define and set the trainer
-local trainer = nn.StochasticGradient(mlp, criterion)
+local trainer = nn.StochasticGradient(mlp, loss)
 trainer.learningRate = 0.01
 
 -- Train the Multilayer Perceptron
@@ -39,17 +34,10 @@ trainer:train(train)
 
 -- Evaluate the MLP
 print("Evaluating network")
-local correct_values = 0
+local matrix = optim.ConfusionMatrix(newsgroups_sparse.num_classes)
 
 for i = 1, test:size() do
-    local y_hat = mlp:forward(test[i][1])
-    if y_hat == test[i][2] then
-        print(string.format("The result was the same %d - %d", test[i][2], y_hat))
-        correct_values = correct_values + 1
-    else
-        print(string.format("The result was different %d - %d", test[i][2], y_hat))
-    end
+    matrix:add(mlp:forward(test[i][1]), test[i][2])
 end
 
-local accuracy = correct_values / test:size()
-print(string.format("Final accuracy: %.2f", accuracy))
+print(matrix)
